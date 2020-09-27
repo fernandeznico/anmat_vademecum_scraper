@@ -1,6 +1,7 @@
 import re
 import os
 import glob
+import time
 
 import requests
 
@@ -69,18 +70,26 @@ class ANMATVademecumNavigation:
     URL = 'https://servicios.pami.org.ar/vademecum/views/consultaPublica/listado.zul'
     
     class Control:
-        @staticmethod
-        def navigation(capture_navigation=True):
+        @classmethod
+        def navigation(cls, capture_navigation=True):
             def request_exception_error_handler(method: callable):
                 def handler(self: 'ANMATVademecumNavigation', *args, **kwargs):
+                    def recursive_call():
+                        nonlocal capture_navigation, method, self, args, kwargs
+                        real_capture_navigation = capture_navigation
+                        capture_navigation = False
+                        return cls.navigation(real_capture_navigation)(method)(self, *args, **kwargs)
                     try:
                         response = method(self, *args, **kwargs)
                         if response and "title:'Error'" in response.text:
                             raise requests.exceptions.RequestException
                         return response
+                    except requests.exceptions.ConnectionError:
+                        time.sleep(10)
+                        return recursive_call()
                     except requests.exceptions.RequestException:
                         self.reset_connection_and_recover_last_state()
-                        return method(self, *args, **kwargs)
+                        return recursive_call()
                     finally:
                         if capture_navigation:
                             self.capture_navigation(method, args, kwargs)
