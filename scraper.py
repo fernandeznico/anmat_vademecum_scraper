@@ -17,6 +17,10 @@ SHOW_REQUESTS = False
 SHOW_PARSED_DATA = False
 
 
+def add_time(string):
+    return f'{datetime.now().strftime("%H:%m:%S")} {string}'
+
+
 class RequestsDebugger:
     def __init__(self):
         self.session = requests.Session()
@@ -84,8 +88,10 @@ class ANMATVademecumNavigation:
                         if response and "title:'Error'" in response.text:
                             raise requests.exceptions.RequestException
                         return response
-                    except requests.exceptions.ConnectionError:
+                    except requests.exceptions.ConnectionError as e:
                         time.sleep(10)
+                        self.print.show(e.response)
+                        self.print.show('waiting 10 seconds...')
                         return recursive_call()
                     except requests.exceptions.RequestException:
                         self.reset_connection_and_recover_last_state()
@@ -103,7 +109,7 @@ class ANMATVademecumNavigation:
         self.session_id = None
         self.lab_item_name_in_selector = None
         self.capture_navigation_off = False
-        self.print = PrintControl(flush=True, on=SHOW_NAVIGATION)
+        self.print = PrintControl(flush=True, on=SHOW_NAVIGATION, color=PrintControl.GREEN, formatter_function=add_time)
         self.history_methods = []
         self.history_params = []
 
@@ -255,8 +261,9 @@ class ANMATScraper:
         self.labs_amount = None
         self.labs = []  # type: List[ANMATLab]
         self.now = datetime.now()
-        self.print = PrintControl(flush=True, on=SHOW_PROGRESS)
-        self.print_data = PrintControl(flush=True, on=SHOW_PARSED_DATA)
+        self.progress = PrintControl(flush=True, on=SHOW_PROGRESS, formatter_function=add_time)
+        self.parsed_data = \
+            PrintControl(flush=True, on=SHOW_PARSED_DATA, color=PrintControl.BLUE, formatter_function=add_time)
 
     def get_how_many_pages_are_in_labs_selector(self):
         labs_selector_response = self.nav.labs_selector__open_page()
@@ -332,7 +339,7 @@ class ANMATScraper:
         if not pages_re or 'La búsqueda no ha devuelto resultados' in lab_meds_re.text:
             return []
         num_pages = int(pages_re[0])
-        self.print.show(
+        self.progress.show(
             '::: LAB ({}/{}) {} PAGE 1/{} :::'.format(
                 len(self.labs), self.labs_amount, self.labs[-1].razon_social, num_pages
             )
@@ -340,7 +347,7 @@ class ANMATScraper:
         meds_data = []
         parse_meds_data()
         for page in range(1, num_pages):
-            self.print.show(
+            self.progress.show(
                 '::: LAB ({}/{}) {} PAGE {}/{} :::'.format(
                     len(self.labs), self.labs_amount, self.labs[-1].razon_social, page + 1, num_pages
                 )
@@ -364,7 +371,7 @@ class ANMATScraper:
         with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'w') as csv_meds__file:
             csv_meds__file.write(meds_header__str + '\n')
         for labs_sel_pag_num in range(labs_sel__num_pages):
-            self.print.show('::: PAGE {}/{} :::'.format(labs_sel_pag_num + 1, labs_sel__num_pages))
+            self.progress.show('::: PAGE {}/{} :::'.format(labs_sel_pag_num + 1, labs_sel__num_pages))
             labs_sel_pag__num_labs = self.get_how_many_labs_are_in_labs_sel_page(labs_sel_pag_num)
             for labs_sel_pos in range(labs_sel_pag__num_labs):
                 self.get_next_lab(labs_sel_pag_num)
@@ -372,14 +379,14 @@ class ANMATScraper:
                 meds = self.load_meds_of_the_selected_lab()
                 if not meds:
                     continue
-                self.print.show(
+                self.progress.show(
                     '::: LAB ({}/{}) {} ENDED WITH {} MEDS PARSED :::'.format(
                         len(self.labs), self.labs_amount, self.labs[-1].razon_social, len(meds)
                     )
                 )
                 meds_rows = ['"' + csv_delimiter.join(med) + '"' for med in meds]
                 csv_meds__str = '\n'.join(meds_rows) + '\n'
-                self.print_data.show(csv_meds__str)
+                self.parsed_data.show(csv_meds__str)
                 with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'a') as csv_meds__file:
                     csv_meds__file.write(csv_meds__str)
         self.update_labs_history_file()
