@@ -90,8 +90,8 @@ class ANMATVademecumNavigation:
                         return response
                     except requests.exceptions.ConnectionError as e:
                         time.sleep(10)
-                        self.print.show(e.response)
-                        self.print.show('waiting 10 seconds...')
+                        self.print.show(f'[NAVIGATION] --- {e.response} ---', color=PrintControl.RED)
+                        self.print.show('[NAVIGATION] --- waiting 10 seconds... ---', color=PrintControl.RED)
                         return recursive_call()
                     except requests.exceptions.RequestException:
                         self.reset_connection_and_recover_last_state()
@@ -130,8 +130,8 @@ class ANMATVademecumNavigation:
         self.history_params.append((args, kwargs))
 
     def reset_connection_and_recover_last_state(self):
-        self.print.show('[NAVIGATION] --- CONNECTION RESET BY PEER OR RECEIVED ERROR ---')
-        self.print.show('[NAVIGATION] --- RE CONNECTING AND STATE RECOVERING ---')
+        self.print.show('[NAVIGATION] --- CONNECTION RESET BY PEER OR RECEIVED ERROR ---', color=PrintControl.RED)
+        self.print.show('[NAVIGATION] --- RE CONNECTING AND STATE RECOVERING ---', color=PrintControl.RED)
         self.capture_navigation_off = True
         self.new_session()
         for method, params in zip(self.history_methods, self.history_params):
