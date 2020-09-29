@@ -18,7 +18,7 @@ SHOW_PARSED_DATA = False
 
 
 def add_time(string):
-    return f'{datetime.now().strftime("%H:%m:%S")} {string}'
+    return f'{datetime.now().strftime("%H:%M:%S")} {string}'
 
 
 class RequestsDebugger:
