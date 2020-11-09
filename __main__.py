@@ -1,4 +1,4 @@
-from .scraper import ANMATScraper
+from scraper import ANMATScraper
 
 
 def main():
