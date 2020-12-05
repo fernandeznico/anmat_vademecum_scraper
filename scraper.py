@@ -252,10 +252,12 @@ class ANMATVademecumNavigation:
 class ANMATScraper:
 
     URL = 'https://servicios.pami.org.ar/vademecum/views/consultaPublica/listado.zul'
+    DATA_BRANCH = 'data'
 
     def __init__(self):
         self.nav = ANMATVademecumNavigation()
-        self.data_path = dir_abs_path_of_file(__file__) + 'data/'
+        self.repo_path = dir_abs_path_of_file(__file__)
+        self.data_path = self.repo_path + 'data/'
         self.labs_path = self.data_path + 'labs/'
         os.makedirs(self.labs_path, exist_ok=True)
         self.labs_amount = None
@@ -356,7 +358,14 @@ class ANMATScraper:
             parse_meds_data()
         return meds_data
 
+    def upload_data_to_github(self):
+        os.system(f'git add {self.data_path}')
+        os.system('git commit -m "Automatic upload data files"')
+        os.system('git push')
+
     def run(self):
+        os.system(f'cd {self.repo_path}')
+        os.system(f'git checkout origin/{self.DATA_BRANCH}')
         self.nav.page__open_and_load_session_ids()
         labs_sel__num_pages = self.get_how_many_pages_are_in_labs_selector()
         csv_delimiter = '","'
@@ -390,3 +399,4 @@ class ANMATScraper:
                 with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'a') as csv_meds__file:
                     csv_meds__file.write(csv_meds__str)
         self.update_labs_history_file()
+        self.upload_data_to_github()
