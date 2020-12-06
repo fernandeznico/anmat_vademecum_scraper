@@ -361,7 +361,7 @@ class ANMATScraper:
     def upload_data_to_github(self):
         os.system(f'git add {self.data_path}')
         os.system('git commit -m "Automatic upload data files"')
-        os.system('git push')
+        os.system('git push origin HEAD:data')
 
     def run(self):
         os.system(f'cd {self.repo_path}')
