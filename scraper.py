@@ -21,6 +21,15 @@ def add_time(string):
     return f'{datetime.now().strftime("%H:%M:%S")} {string}'
 
 
+def checkout_master_at_end(do: callable):
+    def decorator():
+        try:
+            do()
+        finally:
+            os.system(f'git checkout master')
+    return decorator
+
+
 class RequestsDebugger:
     def __init__(self):
         self.session = requests.Session()
@@ -363,6 +372,7 @@ class ANMATScraper:
         os.system('git commit -m "Automatic upload data files"')
         os.system('git push origin HEAD:data')
 
+    @checkout_master_at_end
     def run(self):
         os.system(f'cd {self.repo_path}')
         os.system(f'git checkout origin/{self.DATA_BRANCH}')
