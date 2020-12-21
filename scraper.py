@@ -22,9 +22,9 @@ def add_time(string):
 
 
 def checkout_master_at_end(do: callable):
-    def decorator():
+    def decorator(*args, **kwargs):
         try:
-            do()
+            do(*args, **kwargs)
         finally:
             os.system(f'git checkout master')
     return decorator
