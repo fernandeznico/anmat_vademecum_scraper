@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import os
 import glob
@@ -344,7 +345,14 @@ class ANMATScraper:
                 drugs_table = [drugs_cells[pos:pos+3] for pos in range(0, len(drugs_cells), 3)]
                 new_meds_data[pos].append(('', str(drugs_table)))
             for med_data in new_meds_data:
-                meds_data.append(tuple(tuple_data[1] if tuple_data[0] == '' else '' for tuple_data in med_data))
+                meds_data.append(
+                    tuple(
+                        tuple_data[1] if tuple_data[0] == ''
+                        else str(1 if tuple_data[0] == 'visible:true,'
+                                 else 0)
+                        for tuple_data in med_data
+                    )
+                )
         lab_meds_re = self.nav.search()
         pages_re = re.findall(r'"pageCount",([0-9]+)]', lab_meds_re.text)
         if not pages_re or 'La búsqueda no ha devuelto resultados' in lab_meds_re.text:
@@ -375,17 +383,18 @@ class ANMATScraper:
     @checkout_master_at_end
     def run(self):
         os.system(f'cd {self.repo_path}')
+        os.system(f'git fetch')
         os.system(f'git checkout origin/{self.DATA_BRANCH}')
         self.nav.page__open_and_load_session_ids()
         labs_sel__num_pages = self.get_how_many_pages_are_in_labs_selector()
         csv_delimiter = '","'
         meds_header__str = '"' + csv_delimiter.join([
             'N° Certificado', 'Laboratorio', 'Nombre Comercial', 'Forma Farmacéutica', 'Presentación',
-            'Precio Venta al Público', 'Genérico', 'Detalle',
+            'Precio Venta al Público',
             ' (uso exclusivamente hospitalario - muestra médica - no venta al público)',
             ' (muestra médica - no venta al público)', ' (uso exclusivamente hospitalario - muestra médica)',
             ' (uso exclusivamente hospitalario - no venta al público)', ' (uso exclusivamente hospitalario)',
-            ' (muestra médica)', ' (no venta al público)', 'GTIN', 'Genérico[IFA,Cantidad,Unidad]'
+            ' (muestra médica)', ' (no venta al público)', 'GTIN', 'Genérico', 'Genérico[IFA,Cantidad,Unidad]'
         ]) + '"'
         with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'w') as csv_meds__file:
             csv_meds__file.write(meds_header__str + '\n')
