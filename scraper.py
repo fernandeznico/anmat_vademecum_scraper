@@ -387,15 +387,15 @@ class ANMATScraper:
         os.system(f'git checkout origin/{self.DATA_BRANCH}')
         self.nav.page__open_and_load_session_ids()
         labs_sel__num_pages = self.get_how_many_pages_are_in_labs_selector()
-        csv_delimiter = '","'
-        meds_header__str = '"' + csv_delimiter.join([
+        csv_delimiter = '|'
+        meds_header__str = csv_delimiter.join([
             'N° Certificado', 'Laboratorio', 'Nombre Comercial', 'Forma Farmacéutica', 'Presentación',
             'Precio Venta al Público',
             ' (uso exclusivamente hospitalario - muestra médica - no venta al público)',
             ' (muestra médica - no venta al público)', ' (uso exclusivamente hospitalario - muestra médica)',
             ' (uso exclusivamente hospitalario - no venta al público)', ' (uso exclusivamente hospitalario)',
             ' (muestra médica)', ' (no venta al público)', 'GTIN', 'Genérico', 'Genérico[IFA,Cantidad,Unidad]'
-        ]) + '"'
+        ])
         with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'w') as csv_meds__file:
             csv_meds__file.write(meds_header__str + '\n')
         for labs_sel_pag_num in range(labs_sel__num_pages):
@@ -412,7 +412,7 @@ class ANMATScraper:
                         len(self.labs), self.labs_amount, self.labs[-1].razon_social, len(meds)
                     )
                 )
-                meds_rows = ['"' + csv_delimiter.join(med) + '"' for med in meds]
+                meds_rows = [csv_delimiter.join(med) for med in meds]
                 csv_meds__str = '\n'.join(meds_rows) + '\n'
                 self.parsed_data.show(csv_meds__str)
                 with open(self.data_path + self.now.strftime('%Y%m%d') + '.csv', 'a') as csv_meds__file:
