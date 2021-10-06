@@ -1,5 +1,4 @@
-# anmat_vademecum_scraper
-Web scraper of the site: https://servicios.pami.org.ar/vademecum/views/consultaPublica/listado.zul
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/dashboard?id=fernandeznico_anmat_vademecum_scraper)
 
-## SonarQube (from SonarCloud)
-https://sonarcloud.io/dashboard?id=fernandeznico_anmat_vademecum_scraper
+# Anmat Vademecum Scraper
+Web scraper for: https://servicios.pami.org.ar/vademecum/views/consultaPublica/listado.zul
