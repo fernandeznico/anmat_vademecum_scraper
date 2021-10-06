@@ -21,9 +21,11 @@ class OnOffMethods:
         self.initialized = True
 
     def _init(self, *argv, **kwargs):
+        """Off method."""
         pass
 
     def pass_(self, *args, **kwargs):
+        """Off method."""
         pass
 
     def save_attr(self):

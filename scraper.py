@@ -81,8 +81,10 @@ class ANMATLab:
 
 class ANMATVademecumNavigation:
 
-    URL = 'https://servicios.pami.org.ar/vademecum/views/consultaPublica/listado.zul'
-    
+    MAIN_URL = 'https://servicios.pami.org.ar/vademecum'
+    URL = f'{MAIN_URL}/views/consultaPublica/listado.zul'
+    URL_SKU = f'{MAIN_URL}/zkau'
+
     class Control:
         @classmethod
         def navigation(cls, capture_navigation=True):
@@ -122,9 +124,6 @@ class ANMATVademecumNavigation:
         self.print = PrintControl(flush=True, on=SHOW_NAVIGATION, color=PrintControl.GREEN, formatter_function=add_time)
         self.history_methods = []
         self.history_params = []
-
-    def pass_method(self, *args, **kwargs):
-        pass
 
     def new_session(self):
         self.session = requests.Session() if not SHOW_REQUESTS else RequestsDebugger()
@@ -167,7 +166,7 @@ class ANMATVademecumNavigation:
         def labs_selector__open():
             self.print.show('[NAVIGATION] --- OPEN LABS SELECTOR ---')
             return self.session.post(
-                'https://servicios.pami.org.ar/vademecum/zkau;jsessionid={}'.format(self.session_id),
+                f'{self.URL_SKU};jsessionid={self.session_id}',
                 data={
                   'dtid': self.dt_id,
                   'cmd_0': 'onOpen',
@@ -179,7 +178,7 @@ class ANMATVademecumNavigation:
         if page:
             self.print.show('[NAVIGATION] --- LABS SELECTOR, SELECT PAGE: {} ---'.format(page))
             response = self.session.post(
-                'https://servicios.pami.org.ar/vademecum/zkau',
+                self.URL_SKU,
                 data={
                     'dtid': self.dt_id,
                     'cmd_0': 'onPaging',
